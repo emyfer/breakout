@@ -1,9 +1,9 @@
 let board;
 let boardWidth = 700;
-let boardHeight = 500;
+let boardHeight = 600;
 let context;
 
-let playerWidth = 80;
+let playerWidth = 90;
 let playerHeight = 10;
 let playerVelocityX = 10;
 
@@ -81,6 +81,10 @@ function update() {
 
     context.clearRect(0, 0, board.width, board.height)
 
+    context.shadowColor = "rgba(175, 201, 241, 0.84)"
+    context.shadowBlur = 4
+    context.shadowOffsetX = 2
+    context.shadowOffsetY = 2 
     context.fillStyle = "lightgreen"
     context.fillRect(player.x, player.y, player.width, player.height)
 
@@ -135,6 +139,10 @@ function update() {
         context.fillText("YOU WIN :D", boardWidth / 2, boardHeight / 2)
     }
 
+    context.shadowColor = null
+    context.shadowBlur = 0
+    context.shadowOffsetX = 0 
+    context.shadowOffsetY = 0
     context.font = "20px Verdana"
     context.fillStyle = "white"
     context.textAlign = "left"
@@ -146,6 +154,17 @@ function update() {
 function movePlayer(e) {
     if (!gameStarted && e.code === "Space") {
         gameStarted = true
+
+        ball.x = player.x + player.width / 2 - ball.width / 2
+        ball.y = player.y - ball.height
+
+        // Odaberi nasumičnu stranu (lijevo ili desno)
+        let direction = Math.random() < 0.5 ? -1 : 1
+
+        // Kut 45° => velocityX = ±velocityY
+        ball.velocityX = 3 * direction
+        ball.velocityY = -3
+
         return
     }
 
