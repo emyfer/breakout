@@ -202,8 +202,8 @@ function rightCollision(ball, block) {
 
 function createBlocks() {
     blockArray = []
-    for (let c = 0; c < 1; c++) {
-        for (let r = 0; r < 1; r++) {
+    for (let c = 0; c < blockColumns; c++) {
+        for (let r = 0; r < blockRows; r++) {
             let color;
             if (r === 0) color = "rgb(153, 51, 0)"
             else if (r === 1) color = "rgb(255, 0, 0)"
