@@ -1,13 +1,13 @@
-let board;
+let canvas;
 let boardWidth = 700;
 let boardHeight = 600;
 let context;
 
-let playerWidth = 90;
+let playerWidth = 100;
 let playerHeight = 10;
 let playerVelocityX = 10;
 
-let player = { 
+let paddle = { 
     x: boardWidth / 2 - playerWidth / 2,
     y: boardHeight - playerHeight,
     width: playerWidth,
@@ -17,16 +17,15 @@ let player = {
 
 let ballWidth = 10;
 let ballHeight = 10;
-let ballVelocityX = 3;
-let ballVelocityY = 2;
+
 
 let ball = {
-    x: boardWidth / 2,
-    y: boardHeight / 2,
+    x: paddle.x + paddle.width / 2 - ballWidth / 2,
+    y: paddle.y - ballHeight,
     width: ballWidth,
     height: ballHeight,
-    velocityX: ballVelocityX,
-    velocityY: ballVelocityY
+    velocityX: 3 * (Math.random() < 0.5 ? -1 : 1),
+    velocityY: -3
 };
 
 let blockArray = []
@@ -46,10 +45,10 @@ let gameOver = false
 let bestScore = localStorage.getItem("bestScore") ? parseInt(localStorage.getItem("bestScore")) : 0
 
 window.onload = function() {
-    board = document.getElementById("board")
-    board.height = boardHeight
-    board.width = boardWidth
-    context = board.getContext("2d")
+    canvas = document.getElementById("canvas")
+    canvas.height = boardHeight
+    canvas.width = boardWidth
+    context = canvas.getContext("2d")
 
     requestAnimationFrame(update);
     document.addEventListener("keydown", movePlayer)
@@ -70,6 +69,14 @@ function update() {
         context.fillText("Press SPACE to begin", boardWidth / 2, 260)
         return
     }
+
+    if(blockCount == 0) {
+        context.font = "40px Verdana bold"
+        context.textAlign = "center"
+        context.fillStyle = "white"
+        context.fillText("YOU WIN :D", boardWidth / 2, boardHeight / 2)
+        return
+    }
     
     if(gameOver) {
         context.fillStyle = "white"
@@ -79,16 +86,16 @@ function update() {
         return
     }
 
-    context.clearRect(0, 0, board.width, board.height)
+    context.clearRect(0, 0, canvas.width, canvas.height)
 
     context.shadowColor = "rgba(175, 201, 241, 0.84)"
     context.shadowBlur = 4
     context.shadowOffsetX = 2
     context.shadowOffsetY = 2 
-    context.fillStyle = "lightgreen"
-    context.fillRect(player.x, player.y, player.width, player.height)
-
     context.fillStyle = "lightgray"
+    context.fillRect(paddle.x, paddle.y, paddle.width, paddle.height)
+
+    context.fillStyle = "white"
     ball.x += ball.velocityX
     ball.y += ball.velocityY
     context.fillRect(ball.x, ball.y, ball.width, ball.height)
@@ -101,7 +108,7 @@ function update() {
         gameOver = true
     } 
 
-    if (detectCollision(ball, player)) {
+    if (detectCollision(ball, paddle)) {
         ball.velocityY *= -1
     }
 
@@ -132,12 +139,6 @@ function update() {
         }
     }
 
-    if(blockCount == 0) {
-        gameOver = true
-        context.font = "40px Verdana bold"
-        context.textAlign = "center"
-        context.fillText("YOU WIN :D", boardWidth / 2, boardHeight / 2)
-    }
 
     context.shadowColor = null
     context.shadowBlur = 0
@@ -154,28 +155,17 @@ function update() {
 function movePlayer(e) {
     if (!gameStarted && e.code === "Space") {
         gameStarted = true
-
-        ball.x = player.x + player.width / 2 - ball.width / 2
-        ball.y = player.y - ball.height
-
-        // Odaberi nasumičnu stranu (lijevo ili desno)
-        let direction = Math.random() < 0.5 ? -1 : 1
-
-        // Kut 45° => velocityX = ±velocityY
-        ball.velocityX = 3 * direction
-        ball.velocityY = -3
-
         return
     }
 
     if (gameOver) return;
 
     if (e.code === "ArrowLeft") {
-        let nextX = player.x - player.velocityX
-        if (nextX >= 0) player.x = nextX
+        let nextX = paddle.x - paddle.velocityX
+        if (nextX >= 0) paddle.x = nextX
     } else if (e.code === "ArrowRight") {
-        let nextX = player.x + player.velocityX
-        if (nextX + player.width <= boardWidth) player.x = nextX
+        let nextX = paddle.x + paddle.velocityX
+        if (nextX + paddle.width <= boardWidth) paddle.x = nextX
     }
 }
 
@@ -212,8 +202,8 @@ function rightCollision(ball, block) {
 
 function createBlocks() {
     blockArray = []
-    for (let c = 0; c < blockColumns; c++) {
-        for (let r = 0; r < blockRows; r++) {
+    for (let c = 0; c < 1; c++) {
+        for (let r = 0; r < 1; r++) {
             let color;
             if (r === 0) color = "rgb(153, 51, 0)"
             else if (r === 1) color = "rgb(255, 0, 0)"
