@@ -1,6 +1,6 @@
 let canvas;
-let boardWidth = 700;
-let boardHeight = 600;
+let canvasWidth = 700;
+let canvasHeight = 600;
 let context;
 
 let playerWidth = 100;
@@ -8,8 +8,8 @@ let playerHeight = 10;
 let playerVelocityX = 10;
 
 let paddle = { 
-    x: boardWidth / 2 - playerWidth / 2,
-    y: boardHeight - playerHeight,
+    x: canvasWidth / 2 - playerWidth / 2,
+    y: canvasHeight - playerHeight,
     width: playerWidth,
     height: playerHeight,
     velocityX: playerVelocityX
@@ -46,27 +46,27 @@ let bestScore = localStorage.getItem("bestScore") ? parseInt(localStorage.getIte
 
 window.onload = function() {
     canvas = document.getElementById("canvas")
-    canvas.height = boardHeight
-    canvas.width = boardWidth
+    canvas.height = canvasHeight
+    canvas.width = canvasWidth
     context = canvas.getContext("2d")
 
-    requestAnimationFrame(update);
-    document.addEventListener("keydown", movePlayer)
+    requestAnimationFrame(draw);
+    document.addEventListener("keydown", play)
 
-    createBlocks()
+    blockSpawn()
 };
 
-function update() {
-    requestAnimationFrame(update)
+function draw() {
+    requestAnimationFrame(draw)
     
     if (!gameStarted) {
         context.fillStyle = "white"
         context.font = "bold 36px Verdana"
         context.textAlign = "center"
-        context.fillText("BREAKOUT", boardWidth / 2, 220)
+        context.fillText("BREAKOUT", canvasWidth / 2, 220)
 
         context.font = "bold italic 18px Verdana"
-        context.fillText("Press SPACE to begin", boardWidth / 2, 260)
+        context.fillText("Press SPACE to begin", canvasWidth / 2, 260)
         return
     }
 
@@ -74,7 +74,7 @@ function update() {
         context.font = "40px Verdana bold"
         context.textAlign = "center"
         context.fillStyle = "white"
-        context.fillText("YOU WIN :D", boardWidth / 2, boardHeight / 2)
+        context.fillText("YOU WIN :D", canvasWidth / 2, canvasHeight / 2)
         return
     }
     
@@ -82,7 +82,7 @@ function update() {
         context.fillStyle = "white"
         context.font = "bold 30px Verdana"
         context.textAlign = "center"
-        context.fillText("GAME OVER", boardWidth / 2, boardHeight / 2)
+        context.fillText("GAME OVER", canvasWidth / 2, canvasHeight / 2)
         return
     }
 
@@ -102,13 +102,13 @@ function update() {
 
     if (ball.y <= 0) {
         ball.velocityY *= -1
-    } else if (ball.x <= 0 || (ball.x + ball.width) >= boardWidth) {
+    } else if (ball.x <= 0 || (ball.x + ball.width) >= canvasWidth) {
         ball.velocityX *= -1
-    } else if (ball.y + ball.height >= boardHeight) {
+    } else if (ball.y + ball.height >= canvasHeight) {
         gameOver = true
     } 
 
-    if (detectCollision(ball, paddle)) {
+    if (collide(ball, paddle)) {
         ball.velocityY *= -1
     }
 
@@ -149,10 +149,10 @@ function update() {
     context.textAlign = "left"
     context.fillText("Score: " + score, 20, 20)
     context.textAlign = "right"
-    context.fillText("Best: " + bestScore, boardWidth - 100, 20)
+    context.fillText("Best: " + bestScore, canvasWidth - 100, 20)
 }
 
-function movePlayer(e) {
+function play(e) {
     if (!gameStarted && e.code === "Space") {
         gameStarted = true
         return
@@ -165,11 +165,11 @@ function movePlayer(e) {
         if (nextX >= 0) paddle.x = nextX
     } else if (e.code === "ArrowRight") {
         let nextX = paddle.x + paddle.velocityX
-        if (nextX + paddle.width <= boardWidth) paddle.x = nextX
+        if (nextX + paddle.width <= canvasWidth) paddle.x = nextX
     }
 }
 
-function detectCollision(a, b) {
+function collide(a, b) {
     return a.x < b.x + b.width &&
            a.x + a.width > b.x &&
            a.y < b.y + b.height &&
@@ -177,30 +177,30 @@ function detectCollision(a, b) {
 }
 
 function topCollision(ball, block) {
-    return detectCollision(ball, block) &&
+    return collide(ball, block) &&
            ball.y + ball.height >= block.y &&
            ball.y < block.y;
 }
 
 function bottomCollision(ball, block) {
-    return detectCollision(ball, block) &&
+    return collide(ball, block) &&
            block.y + block.height >= ball.y &&
            block.y < ball.y;
 }
 
 function leftCollision(ball, block) {
-    return detectCollision(ball, block) &&
+    return collide(ball, block) &&
            ball.x + ball.width >= block.x &&
            ball.x < block.x;
 }
 
 function rightCollision(ball, block) {
-    return detectCollision(ball, block) &&
+    return collide(ball, block) &&
            block.x + block.width >= ball.x &&
            block.x < ball.x;
 }
 
-function createBlocks() {
+function blockSpawn() {
     blockArray = []
     for (let c = 0; c < blockColumns; c++) {
         for (let r = 0; r < blockRows; r++) {
